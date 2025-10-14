@@ -7,6 +7,9 @@ set -e
 echo "🔧 Setting up build environment for Quality Evaluation Tool..."
 echo ""
 
+# This script installs strands-agents and strands-agents-tools
+# These are the AWS-backed AI agents framework packages
+
 # Check Python version
 PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
 echo "📍 Python version: $PYTHON_VERSION"
@@ -27,15 +30,17 @@ echo ""
 echo "📦 Upgrading pip..."
 pip install --upgrade pip
 
+# Check if requirements.txt exists
+if [ ! -f "requirements.txt" ]; then
+    echo "❌ Error: requirements.txt not found"
+    echo "   This file is required for installation"
+    exit 1
+fi
+
 # Install dependencies
 echo ""
 echo "📦 Installing project dependencies..."
-if [ -f "requirements.txt" ]; then
-    pip install -r requirements.txt
-else
-    echo "⚠️  requirements.txt not found, installing core dependencies..."
-    pip install pyyaml strands tenacity boto3 playwright
-fi
+pip install -r requirements.txt
 
 # Install PyInstaller
 echo ""

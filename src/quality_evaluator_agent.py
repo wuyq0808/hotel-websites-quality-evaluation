@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from strands import Agent
 from strands.models import BedrockModel
 from tenacity import Retrying, stop_after_attempt, wait_exponential, retry_if_exception
-from quality_evaluation.strands_browser_direct import evaluate_website_feature
-from quality_evaluation.config_loader import get_config, Feature, WebsiteKey
+from strands_browser_direct import evaluate_website_feature
+from config_loader import get_config, Feature, WebsiteKey
 
 logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 
@@ -197,14 +197,37 @@ def get_feature_prompt(feature, destination, checkin_date, checkout_date):
 if __name__ == "__main__":
     import concurrent.futures
     from datetime import datetime, timedelta
-    from quality_evaluation.strands_browser_direct import evaluate_website_feature
+    from strands_browser_direct import evaluate_website_feature
+
+    # Print configuration on startup
+    print("=" * 80)
+    print("🚀 Quality Evaluation Tool - Configuration")
+    print("=" * 80)
 
     # Get features from config
     features = config.get_enabled_features()
+    print(f"\n📋 Enabled Features: {[f.value for f in features]}")
 
     if not features:
         print("❌ No features enabled in config.yaml")
         sys.exit(1)
+
+    # Print global websites configuration
+    all_websites = config.get_enabled_websites()
+    print(f"\n🌐 All Defined Websites: {[w['key'].value for w in all_websites]}")
+
+    # Print feature-specific website configuration
+    print("\n📊 Feature Website Mapping:")
+    for feature in features:
+        feature_websites = config.get_feature_websites(feature)
+        print(f"  • {feature.value}:")
+        if feature_websites:
+            for website in feature_websites:
+                print(f"    - {website['key'].value}: {website['url']}")
+        else:
+            print(f"    - No websites configured")
+
+    print("\n" + "=" * 80 + "\n")
 
     # Get checkin_checkout offset from config
     checkin_checkout_offset = config.get_checkin_checkout_offset()

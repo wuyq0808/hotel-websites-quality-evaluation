@@ -34,13 +34,12 @@ hidden_imports = [
 ] + strands_hiddenimports + strands_tools_hiddenimports
 
 # Data files to include
-datas = [
-    ('config.yaml', '.'),              # Bundle config.yaml (self-documented)
-]
+# Note: config.yaml should NOT be bundled - it needs to be editable by users
+datas = []
 
 a = Analysis(
-    ['src/quality_evaluation/quality_evaluator_agent.py'],    # Main entry point
-    pathex=['src'],                     # Add src to path for imports
+    ['src/quality_evaluator_agent.py'],    # Main entry point
+    pathex=['src'],                        # Add src to path for imports
     binaries=[],
     datas=datas,
     hiddenimports=hidden_imports,

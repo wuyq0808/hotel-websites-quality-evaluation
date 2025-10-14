@@ -42,43 +42,50 @@ test_parameters:
 
 # =============================================================================
 # WEBSITE CONFIGURATIONS
+# Define URLs for all available websites
+# Which websites actually run is controlled by the features section below
 # =============================================================================
 websites:
   google_travel:
-    enabled: true
     url: "https://www.google.com/travel/"
 
   agoda:
-    enabled: false
     url: "https://www.agoda.com"
 
   booking_com:
-    enabled: false
     url: "https://www.booking.com"
 
   skyscanner:
-    enabled: false
     url: "https://www.skyscanner.com/hotels"
 
 # =============================================================================
 # FEATURES TO TEST
 # =============================================================================
 # Enable/disable features by setting enabled: true/false
+# Configure which websites to run for each feature using 'websites' list
+# Valid values: google_travel, skyscanner, booking_com, agoda
+# Use empty list [] to run on all defined websites
+# Use specific list [google_travel, skyscanner] to run only those websites
 features:
   autocomplete_for_destinations_hotels:
     enabled: true
+    websites: []  # Empty = all defined websites
 
   relevance_of_top_listings:
     enabled: false
+    websites: []  # Empty = all defined websites
 
   five_partners_per_hotel:
     enabled: false
+    websites: [google_travel, skyscanner]  # Only meta-search sites
 
   hero_position_partner_mix:
     enabled: false
+    websites: [google_travel, skyscanner]  # Only meta-search sites
 
   distance_accuracy:
     enabled: false
+    websites: []  # Empty = all defined websites
 
 # =============================================================================
 # SITE-SPECIFIC INSTRUCTIONS

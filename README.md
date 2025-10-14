@@ -88,6 +88,8 @@ Results are saved to:
 - Dependencies listed in `requirements.txt`
 - Playwright browsers (installed automatically by setup script)
 
+**Note**: This project uses `strands-agents` and `strands-agents-tools` - the AWS-backed AI agents framework for building intelligent agents with model-driven approaches.
+
 ## Distribution
 
 Create release package:

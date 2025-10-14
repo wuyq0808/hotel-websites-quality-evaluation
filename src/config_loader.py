@@ -46,9 +46,15 @@ class ConfigLoader:
             yaml.YAMLError: If config.yaml is malformed
         """
         if config_path is None:
-            # Look for config.yaml in the same directory as this script
-            script_dir = Path(__file__).parent
-            config_path = script_dir / "config.yaml"
+            # Look for config.yaml next to the executable (PyInstaller) or in src
+            if getattr(sys, 'frozen', False):
+                # Running as PyInstaller executable - look next to the executable
+                app_dir = Path(sys.executable).parent
+                config_path = app_dir / "config.yaml"
+            else:
+                # Running as normal Python script - look in same directory (src)
+                src_dir = Path(__file__).parent
+                config_path = src_dir / "config.yaml"
 
         self.config_path = Path(config_path)
 
@@ -121,14 +127,16 @@ class ConfigLoader:
 
     def get_enabled_websites(self) -> List[Dict[str, Any]]:
         """
-        Get list of enabled websites with their configurations
+        Get list of all defined websites with their configurations
+        Note: 'enabled' flag removed - all websites with URLs are returned
+        Which websites actually run is controlled by features config
 
         Returns:
-            List of dicts with 'key', 'url' for each enabled website
+            List of dicts with 'key', 'url' for each website
         """
         websites = []
         for site_name, site_config in self.config['websites'].items():
-            if site_config.get('enabled', False):
+            if site_config.get('url'):
                 websites.append({
                     'key': WebsiteKey(site_name),
                     'url': site_config['url']
@@ -141,9 +149,10 @@ class ConfigLoader:
         return site_config['url'] if site_config else None
 
     def is_website_enabled(self, website_key: WebsiteKey) -> bool:
-        """Check if a website is enabled"""
+        """Check if a website is defined (has a URL)
+        Note: 'enabled' flag removed - this now just checks if website exists"""
         site_config = self.config['websites'].get(website_key.value)
-        return site_config.get('enabled', False) if site_config else False
+        return bool(site_config and site_config.get('url')) if site_config else False
 
     # =========================================================================
     # Features
@@ -174,7 +183,7 @@ class ConfigLoader:
     def get_feature_websites(self, feature: Feature) -> List[Dict[str, Any]]:
         """
         Get websites to test for a specific feature
-        Some features only work with meta-search sites
+        Reads from feature's 'websites' config if specified, otherwise uses all enabled sites
 
         Args:
             feature: Feature enum
@@ -182,25 +191,32 @@ class ConfigLoader:
         Returns:
             List of enabled websites appropriate for this feature
         """
-        # Features that only work with meta-search sites
-        meta_search_only_features = [
-            Feature.FIVE_PARTNERS_PER_HOTEL,
-            Feature.HERO_POSITION_PARTNER_MIX,
-        ]
+        feature_config = self.config['features'].get(feature.value, {})
+        specified_websites = feature_config.get('websites', [])
 
-        if feature in meta_search_only_features:
-            # Only return Google Travel and Skyscanner if enabled
-            meta_sites = []
-            for site_key in [WebsiteKey.GOOGLE_TRAVEL, WebsiteKey.SKYSCANNER]:
-                if self.is_website_enabled(site_key):
-                    meta_sites.append({
-                        'key': site_key,
-                        'url': self.get_website_url(site_key)
-                    })
-            return meta_sites
-        else:
-            # Return all enabled websites
+        # If websites list is empty or not specified, use all defined websites
+        if not specified_websites:
             return self.get_enabled_websites()
+
+        # Otherwise, use the specified websites (feature-level list is authoritative)
+        websites = []
+        for website_name in specified_websites:
+            try:
+                website_key = WebsiteKey(website_name)
+                url = self.get_website_url(website_key)
+                if url:
+                    websites.append({
+                        'key': website_key,
+                        'url': url
+                    })
+                else:
+                    print(f"⚠️  Warning: Website '{website_name}' specified for feature {feature.value} but has no URL configured")
+            except ValueError:
+                # Invalid website name in config, skip it
+                print(f"⚠️  Warning: Invalid website '{website_name}' specified for feature {feature.value}")
+                continue
+
+        return websites
 
     # =========================================================================
     # Site-Specific Instructions

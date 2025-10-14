@@ -7,8 +7,8 @@ set -e  # Exit on error
 echo "🔨 Building Quality Evaluation Tool..."
 
 # Check if we're in the right directory
-if [ ! -d "src/quality_evaluation" ]; then
-    echo "❌ Error: src/quality_evaluation/ not found. Are you in the right directory?"
+if [ ! -d "src" ] || [ ! -f "src/quality_evaluator_agent.py" ]; then
+    echo "❌ Error: src/ directory or main script not found. Are you in the right directory?"
     exit 1
 fi
 
@@ -24,9 +24,9 @@ else
     echo "   Continuing with system Python..."
 fi
 
-# Check if config.yaml exists
-if [ ! -f "config.yaml" ]; then
-    echo "❌ Error: config.yaml not found. Cannot build without configuration."
+# Check if config.yaml exists in src
+if [ ! -f "src/config.yaml" ]; then
+    echo "❌ Error: src/config.yaml not found. Cannot build without configuration."
     exit 1
 fi
 
@@ -59,8 +59,12 @@ if [ -f "dist/quality_evaluation" ]; then
     RELEASE_DIR="quality_evaluation_release_$DATE_STAMP"
     rm -rf "$RELEASE_DIR" quality_evaluation_release_*.tar.gz
     mkdir -p "$RELEASE_DIR"
-    cp quality_evaluation config.yaml "$RELEASE_DIR/"
+    cp quality_evaluation ../src/config.yaml "$RELEASE_DIR/"
     tar -czf "$RELEASE_DIR.tar.gz" "$RELEASE_DIR/"
+
+    # Clean up intermediate files, keep only tarball
+    rm -rf "$RELEASE_DIR" quality_evaluation config.yaml
+
     echo "✅ Release package created: dist/$RELEASE_DIR.tar.gz"
     cd ..
 
