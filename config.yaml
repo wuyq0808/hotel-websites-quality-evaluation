@@ -1,0 +1,308 @@
+# Quality Evaluation Configuration File
+# This file contains all prompts and settings for the quality evaluation system
+# Edit this file to customize testing behavior, prompts, and website configurations
+
+# =============================================================================
+# BROWSER & MODEL SETTINGS
+# =============================================================================
+browser:
+  # AgentCore browser identifier for recording sessions
+  browser_id: "recordingBrowserWithS3_20250916170045-Ec92oniUSi"
+
+  # Session timeout in seconds (7200 = 2 hours)
+  session_timeout: 7200
+
+  # AWS region for browser service
+  region: "us-east-1"
+
+model:
+  # Bedrock model configuration
+  model_id: "eu.anthropic.claude-sonnet-4-20250514-v1:0"
+  region_name: "eu-west-1"
+  temperature: 0.1
+
+# =============================================================================
+# TEST PARAMETERS
+# =============================================================================
+test_parameters:
+  # Cities to test (add or remove cities as needed)
+  cities:
+    - "Tokyo"
+    # - "London"
+    # - "Dubai"
+    # - "Rome"
+    # - "Paris"
+
+  # Checkin-checkout configuration
+  # Format: {days from today for checkin, days from today for checkout}
+  checkin_checkout:
+    next_day_one_night:
+      checkin_offset: 1  # Days from today
+      checkout_offset: 2  # Days from today
+
+# =============================================================================
+# WEBSITE CONFIGURATIONS
+# =============================================================================
+websites:
+  google_travel:
+    enabled: true
+    url: "https://www.google.com/travel/"
+
+  agoda:
+    enabled: false
+    url: "https://www.agoda.com"
+
+  booking_com:
+    enabled: false
+    url: "https://www.booking.com"
+
+  skyscanner:
+    enabled: false
+    url: "https://www.skyscanner.com/hotels"
+
+# =============================================================================
+# FEATURES TO TEST
+# =============================================================================
+# Enable/disable features by setting enabled: true/false
+features:
+  autocomplete_for_destinations_hotels:
+    enabled: true
+
+  relevance_of_top_listings:
+    enabled: false
+
+  five_partners_per_hotel:
+    enabled: false
+
+  hero_position_partner_mix:
+    enabled: false
+
+  distance_accuracy:
+    enabled: false
+
+# =============================================================================
+# SITE-SPECIFIC INSTRUCTIONS
+# These instructions are provided to the browser agent for each website
+# =============================================================================
+site_instructions:
+  google_travel: |
+    # Click the hotels icon when firstly reach Travel home page
+
+    # For the calendar date picker:
+      - Year is not displayed and default to the current year. Don't try to see or change the year.
+
+    # For inputting text into the search box:
+      - Before typing, use click_coordinate on the cross (X) button to clear the search box.
+
+    # For hotel partners offering counting:
+        - Skip sponsored listings. They are provide by 1 partner only.
+
+  booking_com: |
+    # Add any specific instructions for Booking.com here
+
+  agoda: |
+    Click outside of the calendar to close it if dates are correct
+
+  skyscanner: |
+    # Take snapshot right after the first navigation. You may be redirected to the page 'Are you a person or a robot'.
+      - Don't go to elsewhere. We must resolve the challenge.
+      - Use action human_mouse_move to the button,
+      - Then press_and_hold action to click the button for 7~12 seconds.
+      - And then must wait long enough for the page to load. MUST WAIT LONG ENOUGH.
+      - If it's longer than 2 minutes, do some more human_mouse_move and clicks.
+      - NEVER USE OTHER ACTIONS. MUST USE THESE ACTIONS TO RESOLVE THE CHALLENGE.
+
+    # Check-in / Check-out date pickers:
+      - One for check-in, one for check-out. They are 2 different calanders.
+      - When you selected check-in, the check-in calander will be closed.
+      - Must take screenshot before/after every click to make sure.
+
+    # Clicking a hotel card in search result page may open a new tab.
+      - Must use 'list_tabs' action after clicking a hotel card in search result page.
+      - Always close the hotel details page tab when your done checking it.
+
+    # For hotel partners offer counting:
+      - MUST Click the hotel card, get into the hotel details page to count. MUST get into the hotel details page.
+
+# =============================================================================
+# FEATURE-SPECIFIC PROMPTS
+# These prompts define what to test for each feature
+# Variables available: {destination}, {checkin_date}, {checkout_date}
+# =============================================================================
+feature_prompts:
+  autocomplete_for_destinations_hotels: |
+    Test and record interactions with the auto-complete feature for hotel destinations:
+
+    Destination: {destination}
+
+    Steps:
+    1. Find the search box for hotel destinations and do the following:
+
+    Checks:
+    1. Type in City name, does the main city destination show as the first results?
+    2. Type in City name check if relevant POI's show up
+    3. Type in City name check if POI's are all in the same language
+    4. Type in City name with typo, check if it can handle typo and show the correct city name (MUST try more then enough variations to be thorough)
+
+  relevance_of_top_listings: |
+    Steps:
+    1. Find the destination input,
+    2. Input destination: {destination}.
+    3. Select check-in: {checkin_date}; check-out: {checkout_date}.
+    4. Click search, wait for result.
+
+    Checks:
+    1. Intent Alignment Check: Verify that the top listings align with user intent (e.g. centrally located, well-reviewed, reasonably priced options appear first).
+    2. Review Score Relevance Check: Confirm that top listings include hotels with strong guest scores unless filters or sorting override it.
+    3. Star Rating vs Price Balance Check: Ensure that the first few listings represent a healthy mix of quality (e.g. 3–5 star) and value, rather than skewing too heavily toward one end.
+    4. Repeat Search Consistency Check: Repeat the same search multiple times and check if the top listings remain consistent unless availability changes. (REFRESH THE PAGE AND SEARCH AGAIN TO MAKE SURE IT IS RENEWED)
+    5. Local Context Appropriateness Check: For destination-specific searches (e.g. Tokyo city center), verify that top listings are contextually appropriate (e.g. located in Shinjuku rather than suburban outskirts).
+
+  five_partners_per_hotel: |
+    Steps:
+    1. Find the destination input,
+    2. Input destination: {destination}.
+    3. Select check-in: {checkin_date}; check-out: {checkout_date}.
+    4. Click search, wait for result.
+    5. Get into first hotel details page to see partner offerings. We have partner offering displayed on the search result list, but the details page is more clearer and easier to navigate.
+
+    Checks:
+    1. Check first 5 hotels in hotel search results to see if >= 5 partner offering rates for each hotel. Count the number of booking partners/providers shown for each of the first 5 hotels in the search results.
+
+  hero_position_partner_mix: |
+    Steps:
+    1. Find the destination input,
+    2. Input destination: {destination}.
+    3. Select check-in: {checkin_date}; check-out: {checkout_date}.
+    4. Click search, wait for result.
+
+    Checks:
+    1. Top Position Partner Variation Check: Perform multiple hotel searches and verify that the top (hero) result features a varied mix of partners over time and across queries. Document which partner appears in the top position for each search.
+    2. Partner Distribution Diversity Check: Check if the first few hotel cards (top 5 results) represent a healthy mix of different booking partners rather than being dominated by a single one. Count and document partner distribution.
+    3. Fair Rotation Across Markets Check: Run hotel searches across multiple regions or cities and check if local and global partners are fairly represented in the hero position mix. (Try other cities then just {destination})
+
+  distance_accuracy: |
+    Steps:
+    1. Find the destination input,
+    2. Input destination: {destination}.
+    3. Select check-in: {checkin_date}; check-out: {checkout_date}.
+    4. Click search, wait for result.
+    5. Check first 5 hotels.
+
+    Checks:
+    1. Displayed Distance to Landmark Accuracy Check: Verify that the distance shown on each hotel card accurately reflects the straight-line or walking distance to the specified reference point (e.g. city center or user-selected landmark).
+    2. Landmark Reference Accuracy Check: Check that the hotel's distance is being measured from the correct reference point (e.g. central landmark or city center, not airport or other default).
+    3. Unit of Measurement Check: Ensure that distances are displayed using the correct units (e.g. km or miles) based on user region or settings.
+
+# =============================================================================
+# COMMON PROMPTS
+# System prompts used by the evaluation agents
+# =============================================================================
+prompts:
+  # Browser agent system prompt - guides the agent during website interaction
+  browser_agent_system: |
+    You are a detailed web interaction recorder and observer.
+    Your job is to systematically document everything you see and do while testing website features.
+    Be subjective and critical in your observations - we need honest truth, not praise.
+    Point out usability issues, confusing interfaces, slow performance, and any problems you encounter.
+
+    You must use store_observation("text") to store detailed observations on every step. Store as much information as possible.
+
+    ## Recording Protocol:
+    1. Take screenshots after every click - screenshots are the cardinal source of truth
+    2. Use "click_coordinate" action with pixel coordinates to click elements based on visual analysis
+    3. Dismiss pop-ups, cookie banners using coordinate clicks once you see them
+    4. After clicking on search, selecting hotel, or any clicking that may trigger a new tab, check all tabs/pages we have. Ensure you're working on the correct tab
+    5. Check tab list whenever screenshot fails. Working the wrong tab leads to screenshot failure.
+    6. Document every click, type, hover, and navigation action with precise coordinates
+    7. Record what you see: UI elements, text, buttons, forms, dropdowns, suggestions
+    8. Don't leave the target website, dont' go to partners site.
+
+    ## What to Record:
+    - **Every Interaction**: Step-by-step actions and their results
+    - **UI Behavior**: How elements respond (hover effects, loading states)
+    - **Content Details**: Exact text shown, placeholder text, error messages
+    - **Navigation Flow**: How you move between different parts of the feature
+    - **Edge Cases**: What happens with unusual inputs, empty states, errors
+
+    ## Output:
+    Explain every step when you call tools.
+
+    Structure for store_observation calls:
+    ## Testing Session: [Website] - [Feature]
+    ### Step 1: [Action]
+    - **What I did**: [specific action]
+    - **What I observed**: [detailed findings]
+    - **Screenshot**: [describe what screenshot shows]
+
+    ### Step 2: [Action]
+    - **What I did**: [specific action]
+    - **What I observed**: [detailed findings]
+    - **Screenshot**: [describe what screenshot shows]
+
+    Continue for all testing steps...
+
+    Store comprehensive records in memory. Be meticulous and thorough.
+    Describe in detail: findings and observations.
+
+  # Quality evaluator system prompt - analyzes and compares website recordings
+  quality_evaluator_system: |
+    You are a senior web product manager.
+    Analyze the recorded observations of navigating the sites, Evaluate the features of multiple websites.
+    Be subjective and critical in your evaluations - we need honest truth, not praise.
+    Point out usability issues, confusing interfaces, slow performance, and any problems you encounter.
+
+    Rating Definition
+    1 - Terrible
+    Non-functional, misleading
+    2 - Very Bad
+    Barely usable or broken elements
+    3 - Bad
+    Significant usability/content gaps
+    4 - Neutral
+    Works, but forgettable
+    5 - Good
+    Solid experience, few flaws
+    6 - Very Good
+    Polished and competitive
+    7 - Excellent
+    Best-in-class; highly competitive
+
+    ## Output Template
+    # Checking Steps
+    ## General Steps Taken
+    - Destination: [e.g. Barcelona (May visit multiple cities, here for the main city)]
+    - Check-in: [e.g. 2024-09-20], Check-out: [e.g. 2024-09-21]
+    - [Other steps]
+
+    ## Differences Steps Between Sites
+    - [e.g. Skyscanner has 2 separate inputs for check-in and check-out, Google Travel has a single date range picker]
+    - [e.g. Booking.com requires closing a pop-up]
+
+    Concise summary of steps taken, general steps and differences between sites.
+
+    # Feature: [Feature Name Being Tested]
+    | Checks   | Skyscanner | (Website 2) | (and so on) |
+    |-----------|-----------------------------|-------------------------------|-------------|
+    | Check 1 | 6/7 – Rationale              | 5/7 – Rationale                | (and so on) |
+    | Check 2 | 6/7 – Rationale             | 5/7 – Rationale                | (and so on) |
+    | Overall rating (last row) | 6/7 – Rationale             | 5/7 – Rationale                | (and so on) |
+
+    # Summary
+    - **Skyscanner**
+      - standout strengths
+      - drawbacks
+    - **Booking.com**
+      - standout strengths
+      - drawbacks
+
+# =============================================================================
+# OUTPUT SETTINGS
+# =============================================================================
+output:
+  # Base directory for all evaluation outputs (relative to current working directory)
+  base_directory: "quality_evaluation_output"
+
+  # Subdirectories for different output types
+  text_recording_dir: "text_recording"
+  comparison_analysis_dir: "comparison_analysis"
