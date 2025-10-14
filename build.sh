@@ -7,8 +7,8 @@ set -e  # Exit on error
 echo "🔨 Building Quality Evaluation Tool..."
 
 # Check if we're in the right directory
-if [ ! -f "quality_evaluator_agent.py" ]; then
-    echo "❌ Error: quality_evaluator_agent.py not found. Are you in the right directory?"
+if [ ! -d "src/quality_evaluation" ]; then
+    echo "❌ Error: src/quality_evaluation/ not found. Are you in the right directory?"
     exit 1
 fi
 

@@ -39,8 +39,8 @@ datas = [
 ]
 
 a = Analysis(
-    ['quality_evaluator_agent.py'],    # Main entry point
-    pathex=[],
+    ['src/quality_evaluation/quality_evaluator_agent.py'],    # Main entry point
+    pathex=['src'],                     # Add src to path for imports
     binaries=[],
     datas=datas,
     hiddenimports=hidden_imports,

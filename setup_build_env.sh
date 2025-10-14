@@ -50,6 +50,7 @@ playwright install
 # Verify installation
 echo ""
 echo "✅ Verifying installation..."
+export PYTHONPATH="${PWD}/src:${PYTHONPATH}"
 python3 -c "import yaml; import strands; import tenacity; import PyInstaller; print('All imports successful!')"
 
 # Check config exists

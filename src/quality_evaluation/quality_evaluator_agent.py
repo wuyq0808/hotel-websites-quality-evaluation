@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from strands import Agent
 from strands.models import BedrockModel
 from tenacity import Retrying, stop_after_attempt, wait_exponential, retry_if_exception
-from strands_browser_direct import evaluate_website_feature
-from config_loader import get_config, Feature, WebsiteKey
+from quality_evaluation.strands_browser_direct import evaluate_website_feature
+from quality_evaluation.config_loader import get_config, Feature, WebsiteKey
 
 logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 
@@ -197,7 +197,7 @@ def get_feature_prompt(feature, destination, checkin_date, checkout_date):
 if __name__ == "__main__":
     import concurrent.futures
     from datetime import datetime, timedelta
-    from strands_browser_direct import evaluate_website_feature
+    from quality_evaluation.strands_browser_direct import evaluate_website_feature
 
     # Get features from config
     features = config.get_enabled_features()

@@ -9,8 +9,8 @@ from datetime import datetime
 
 from strands import Agent, tool
 from strands.models import BedrockModel
-from custom_browser import CustomAgentCoreBrowser
-from config_loader import get_config, WebsiteKey
+from quality_evaluation.custom_browser import CustomAgentCoreBrowser
+from quality_evaluation.config_loader import get_config, WebsiteKey
 
 # Load configuration
 config = get_config()

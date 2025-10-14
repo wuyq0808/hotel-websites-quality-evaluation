@@ -35,17 +35,24 @@ See [RELEASE_GUIDE.md](RELEASE_GUIDE.md) for detailed instructions
 
 ```
 quality_evaluation/
-├── quality_evaluator_agent.py   # Main entry point
-├── strands_browser_direct.py    # Browser agent
-├── config_loader.py             # Configuration loader
-├── config.yaml                  # Settings & prompts (EDIT THIS)
-├── custom_browser.py            # Browser tool extensions
-├── venv/                        # Python virtual environment (auto-created)
-├── build.sh                     # Build script
-├── setup_build_env.sh           # Environment setup
-└── dist/                        # Build output
-    ├── quality_evaluation       # Executable
-    └── config.yaml              # Bundled config
+├── src/
+│   └── quality_evaluation/           # Source code package
+│       ├── quality_evaluator_agent.py   # Main entry point
+│       ├── strands_browser_direct.py    # Browser agent
+│       ├── config_loader.py             # Configuration loader
+│       ├── custom_browser.py            # Browser tool extensions
+│       ├── constants.py                 # Deprecated - use config.yaml
+│       └── __init__.py                  # Package initialization
+├── config.yaml                       # Settings & prompts (EDIT THIS)
+├── requirements.txt                  # Python dependencies
+├── build.sh                          # Build script
+├── setup_build_env.sh                # Environment setup
+├── quality_evaluation.spec           # PyInstaller spec
+├── venv/                             # Python virtual environment (auto-created)
+├── scripts/                          # Utility scripts (Confluence tools)
+└── dist/                             # Build output
+    ├── quality_evaluation            # Executable
+    └── config.yaml                   # Bundled config
 ```
 
 ## Usage
@@ -53,7 +60,7 @@ quality_evaluation/
 ### Run from Source
 ```bash
 source venv/bin/activate
-python3 quality_evaluator_agent.py
+python3 -m quality_evaluation.quality_evaluator_agent
 ```
 
 ### Run from Binary
@@ -113,7 +120,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Run directly
-python3 quality_evaluator_agent.py
+python3 -m quality_evaluation.quality_evaluator_agent
 
 # Build after changes
 ./build.sh
