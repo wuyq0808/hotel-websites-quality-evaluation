@@ -30,6 +30,34 @@ if [ ! -f "src/config.yaml" ]; then
     exit 1
 fi
 
+# Copy AWS authentication binaries if not already present
+echo "🔐 Checking AWS authentication binaries..."
+mkdir -p bin
+
+if [ ! -f "bin/mshell" ]; then
+    if [ -f "/opt/homebrew/bin/mshell" ]; then
+        echo "   Copying mshell from Homebrew..."
+        cp /opt/homebrew/Cellar/mshell-tools/*/bin/mshell bin/
+    else
+        echo "❌ Error: mshell not found. Please install: brew install skyscanner-bundle"
+        exit 1
+    fi
+else
+    echo "   ✓ mshell already present"
+fi
+
+if [ ! -f "bin/saml2aws" ]; then
+    if [ -f "/opt/homebrew/bin/saml2aws" ]; then
+        echo "   Copying saml2aws from Homebrew..."
+        cp /opt/homebrew/Cellar/saml2aws/*/bin/saml2aws bin/
+    else
+        echo "❌ Error: saml2aws not found. Please install: brew install saml2aws"
+        exit 1
+    fi
+else
+    echo "   ✓ saml2aws already present"
+fi
+
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."
 rm -rf build/ dist/ __pycache__/

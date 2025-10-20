@@ -14,6 +14,7 @@ from strands.models import BedrockModel
 from tenacity import Retrying, stop_after_attempt, wait_exponential, retry_if_exception
 from strands_browser_direct import evaluate_website_feature
 from config_loader import get_config, Feature, WebsiteKey
+from aws_credential_setup import setup_credentials, verify_binaries
 
 logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 
@@ -194,6 +195,38 @@ def get_feature_prompt(feature, destination, checkin_date, checkout_date):
     return config.get_feature_prompt(feature, destination, checkin_date, checkout_date)
 
 
+def run_evaluations(features, cities, checkin_date, checkout_date, checkin_checkout_offset):
+    """Main evaluation loop - runs all features for all cities"""
+    # Loop through all cities
+    for city in cities:
+        print(f"\n🏙️ Starting evaluation for city: {city}")
+
+        # Loop through all features for each city
+        for feature in features:
+            print(f"\n🚀 Testing feature: {feature.value}")
+
+            feature_instruction = get_feature_prompt(feature, city, checkin_date, checkout_date)
+            feature_websites = get_feature_websites(feature)
+
+            if not feature_websites:
+                print(f"⚠️ No websites enabled for feature {feature.value}")
+                continue
+
+            # Execute evaluations sequentially
+            results = execute_website_evaluations(feature_websites, feature_instruction, feature.value, city, checkin_checkout_offset)
+
+            # Generate comparison analysis
+            generate_feature_comparison(feature, feature_instruction, feature_websites, results, city, checkin_checkout_offset)
+
+            print(f"✅ Completed feature: {feature.value} for city: {city}")
+
+        print(f"✅ Completed all features for city: {city}")
+
+    print("\n" + "=" * 80)
+    print("🎉 All evaluations completed successfully!")
+    print("=" * 80)
+
+
 if __name__ == "__main__":
     import concurrent.futures
     from datetime import datetime, timedelta
@@ -203,6 +236,21 @@ if __name__ == "__main__":
     print("=" * 80)
     print("🚀 Quality Evaluation Tool - Configuration")
     print("=" * 80)
+
+    # Setup AWS credentials (first-time setup if needed)
+    print("\n🔐 Setting up AWS credentials...")
+    try:
+        if not verify_binaries():
+            print("❌ Error: AWS authentication binaries not found")
+            print("   This is a packaging issue. Please contact the developer.")
+            sys.exit(1)
+
+        setup_credentials()
+        print("✅ AWS credentials configured\n")
+    except Exception as e:
+        print(f"❌ Error setting up AWS credentials: {e}")
+        print("   Please check your network connection and try again.")
+        sys.exit(1)
 
     # Get features from config
     features = config.get_enabled_features()
@@ -245,27 +293,5 @@ if __name__ == "__main__":
         print("❌ No cities configured in config.yaml")
         sys.exit(1)
 
-    # Loop through all cities
-    for city in cities:
-        print(f"\n🏙️ Starting evaluation for city: {city}")
-
-        # Loop through all features for each city
-        for feature in features:
-            print(f"\n🚀 Testing feature: {feature.value}")
-
-            feature_instruction = get_feature_prompt(feature, city, checkin_date, checkout_date)
-            feature_websites = get_feature_websites(feature)
-
-            if not feature_websites:
-                print(f"⚠️ No websites enabled for feature {feature.value}")
-                continue
-
-            # Execute evaluations sequentially
-            results = execute_website_evaluations(feature_websites, feature_instruction, feature.value, city, checkin_checkout_offset)
-
-            # Generate comparison analysis
-            generate_feature_comparison(feature, feature_instruction, feature_websites, results, city, checkin_checkout_offset)
-
-            print(f"✅ Completed feature: {feature.value} for city: {city}")
-
-        print(f"✅ Completed all features for city: {city}")
+    # Run evaluations
+    run_evaluations(features, cities, checkin_date, checkout_date, checkin_checkout_offset)

@@ -37,10 +37,16 @@ hidden_imports = [
 # Note: config.yaml should NOT be bundled - it needs to be editable by users
 datas = []
 
+# Bundle mshell and saml2aws binaries for AWS authentication
+binaries_to_bundle = [
+    ('bin/mshell', 'bin'),      # Bundle mshell to bin/ in executable
+    ('bin/saml2aws', 'bin'),    # Bundle saml2aws to bin/ in executable
+]
+
 a = Analysis(
     ['src/quality_evaluator_agent.py'],    # Main entry point
     pathex=['src'],                        # Add src to path for imports
-    binaries=[],
+    binaries=binaries_to_bundle,           # Include AWS auth binaries
     datas=datas,
     hiddenimports=hidden_imports,
     hookspath=[],

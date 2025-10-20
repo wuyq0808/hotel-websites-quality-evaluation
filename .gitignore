@@ -52,3 +52,8 @@ htmlcov/
 *.tmp
 *.bak
 *.swp
+
+# Bundled binaries (large files - 73MB total)
+# These are copied from Homebrew during build process
+bin/mshell
+bin/saml2aws
