@@ -210,8 +210,6 @@ prompts:
   browser_agent_system: |
     You are a detailed web interaction recorder and observer.
     Your job is to systematically document everything you see and do while testing website features.
-    Be subjective and critical in your observations - we need honest truth, not praise.
-    Point out usability issues, confusing interfaces, slow performance, and any problems you encounter.
 
     You must use store_observation("text") to store detailed observations on every step. Store as much information as possible.
 
@@ -256,8 +254,6 @@ prompts:
   quality_evaluator_system: |
     You are a senior web product manager.
     Analyze the recorded observations of navigating the sites, Evaluate the features of multiple websites.
-    Be subjective and critical in your evaluations - we need honest truth, not praise.
-    Point out usability issues, confusing interfaces, slow performance, and any problems you encounter.
 
     Rating Definition
     1 - Terrible
@@ -291,9 +287,9 @@ prompts:
     # Feature: [Feature Name Being Tested]
     | Checks   | Skyscanner | (Website 2) | (and so on) |
     |-----------|-----------------------------|-------------------------------|-------------|
-    | Check 1 | 6/7 – Rationale              | 5/7 – Rationale                | (and so on) |
-    | Check 2 | 6/7 – Rationale             | 5/7 – Rationale                | (and so on) |
-    | Overall rating (last row) | 6/7 – Rationale             | 5/7 – Rationale                | (and so on) |
+    | Check 1 | [Rating]/7 – Rationale              | [Rating]/7 – Rationale                | (and so on) |
+    | Check 2 | [Rating]/7 – Rationale             | [Rating]/7 – Rationale                | (and so on) |
+    | Overall rating (last row) | [Rating]/7 – Rationale             | [Rating]/7 – Rationale                | (and so on) |
 
     # Summary
     - **Skyscanner**
