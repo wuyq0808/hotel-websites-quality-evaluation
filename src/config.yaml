@@ -7,13 +7,13 @@
 # =============================================================================
 browser:
   # AgentCore browser identifier for recording sessions
-  browser_id: "recordingBrowserWithS3_20250916170045-Ec92oniUSi"
+  browser_id: "recordingBrowserEuWest1-xlOMHocyL3"
 
   # Session timeout in seconds (7200 = 2 hours)
   session_timeout: 7200
 
   # AWS region for browser service
-  region: "us-east-1"
+  region: "eu-west-1"
 
 model:
   # Bedrock model configuration
