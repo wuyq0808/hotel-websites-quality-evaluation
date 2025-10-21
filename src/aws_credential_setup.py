@@ -108,18 +108,64 @@ def pre_authenticate():
         mshell_path = get_mshell_path()
         bundled_bin = get_bundled_bin_path()
 
-        logger.info("🔐 Authenticating with AWS (this will open your browser)...")
-
         # Set up environment with bundled bin in PATH so mshell can find saml2aws
         env = os.environ.copy()
         env['PATH'] = f"{bundled_bin}:{env.get('PATH', '')}"
+
+        # Remove stale kubeconfig lock file if it exists
+        # mshell config update writes to ~/.kube/config and can fail if lock exists
+        kube_lock_path = Path.home() / ".kube" / "config.lock"
+        if kube_lock_path.exists():
+            logger.info("🧹 Removing stale kubeconfig lock file...")
+            kube_lock_path.unlink()
+
+        # Run mshell config update first to ensure config is up-to-date
+        logger.info("⚙️  Updating mshell configuration...")
+        config_result = subprocess.run(
+            [mshell_path, "config", "update"],
+            capture_output=True,
+            text=True,
+            timeout=300,  # 5 minutes for user to complete SSO login
+            env=env
+        )
+
+        if config_result.returncode != 0:
+            logger.error(f"❌ mshell config update failed: {config_result.stderr}")
+            return False
+
+        logger.info("✅ mshell config updated successfully")
+
+        # Fix AWS config to use bundled mshell instead of system mshell
+        # mshell config update writes "credential_process = mshell saml2aws..."
+        # We need to replace it with the full path to bundled mshell
+        logger.info("⚙️  Updating AWS config to use bundled mshell...")
+        aws_config_path = Path.home() / ".aws" / "config"
+        if aws_config_path.exists():
+            import re
+            with open(aws_config_path, 'r') as f:
+                config_content = f.read()
+
+            # Replace each credential_process line that uses mshell
+            # Pattern: credential_process = mshell saml2aws <rest of line>
+            # Replace with: credential_process = bash -c 'PATH=<bundled_bin>:$PATH <mshell_path> saml2aws <rest of line>'
+            pattern = r'credential_process\s*=\s*mshell\s+saml2aws\s+(.+?)$'
+            replacement = f'credential_process = bash -c \'PATH={bundled_bin}:$PATH {mshell_path} saml2aws \\1\''
+
+            updated_content = re.sub(pattern, replacement, config_content, flags=re.MULTILINE)
+
+            with open(aws_config_path, 'w') as f:
+                f.write(updated_content)
+
+            logger.info("✅ AWS config updated to use bundled binaries")
+
+        logger.info("🔐 Authenticating with AWS...")
 
         # Run mshell saml2aws to cache credentials
         result = subprocess.run(
             [mshell_path, "saml2aws", "--role", "arn:aws:iam::295180981731:role/SandboxAccessADFS", "--profile", "default"],
             capture_output=True,
             text=True,
-            timeout=120,  # 2 minute timeout for user to complete authentication
+            timeout=300,  # 5 minutes for user to complete authentication
             env=env  # Pass environment with updated PATH
         )
 
@@ -131,7 +177,7 @@ def pre_authenticate():
             return False
 
     except subprocess.TimeoutExpired:
-        logger.error("❌ Authentication timeout - please try again")
+        logger.error("❌ Authentication timeout - please complete SSO login within 5 minutes")
         return False
     except Exception as e:
         logger.error(f"❌ Authentication error: {e}")
