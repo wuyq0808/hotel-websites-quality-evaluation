@@ -36,31 +36,33 @@ See [RELEASE_GUIDE.md](RELEASE_GUIDE.md) for detailed instructions
 ```
 quality_evaluation/
 ├── src/
-│   └── quality_evaluation/           # Source code package
-│       ├── quality_evaluator_agent.py   # Main entry point
-│       ├── strands_browser_direct.py    # Browser agent
-│       ├── config_loader.py             # Configuration loader
-│       ├── custom_browser.py            # Browser tool extensions
-│       ├── constants.py                 # Deprecated - use config.yaml
-│       └── __init__.py                  # Package initialization
-├── config.yaml                       # Settings & prompts (EDIT THIS)
-├── requirements.txt                  # Python dependencies
-├── build.sh                          # Build script
-├── setup_build_env.sh                # Environment setup
-├── quality_evaluation.spec           # PyInstaller spec
-├── venv/                             # Python virtual environment (auto-created)
-├── scripts/                          # Utility scripts (Confluence tools)
-└── dist/                             # Build output
-    ├── quality_evaluation            # Executable
-    └── config.yaml                   # Bundled config
+│   ├── quality_evaluator_agent.py   # Main entry point
+│   ├── strands_browser_direct.py    # Browser agent
+│   ├── config_loader.py             # Configuration loader
+│   ├── custom_browser.py            # Browser tool extensions
+│   ├── aws_credential_setup.py      # AWS authentication
+│   ├── config.yaml                  # Settings & prompts (EDIT THIS)
+│   ├── constants.py                 # Deprecated - use config.yaml
+│   └── __init__.py                  # Package initialization
+├── requirements.txt                 # Python dependencies
+├── build.sh                         # Build script
+├── setup_build_env.sh               # Environment setup
+├── quality_evaluation.spec          # PyInstaller spec
+├── bin/                             # AWS authentication binaries
+│   ├── mshell                       # Shell for AWS auth
+│   └── saml2aws                     # SAML authentication
+├── venv/                            # Python virtual environment (auto-created)
+├── scripts/                         # Utility scripts (Confluence tools)
+└── dist/                            # Build output
+    ├── quality_evaluation           # Executable
+    └── config.yaml                  # Bundled config
 ```
 
 ## Usage
 
 ### Run from Source
 ```bash
-source venv/bin/activate
-python3 -m quality_evaluation.quality_evaluator_agent
+source venv/bin/activate && python3 src/quality_evaluator_agent.py
 ```
 
 ### Run from Binary
@@ -122,7 +124,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Run directly
-python3 -m quality_evaluation.quality_evaluator_agent
+python3 src/quality_evaluator_agent.py
 
 # Build after changes
 ./build.sh

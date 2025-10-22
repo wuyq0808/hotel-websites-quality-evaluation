@@ -260,10 +260,6 @@ if __name__ == "__main__":
         print("❌ No features enabled in config.yaml")
         sys.exit(1)
 
-    # Print global websites configuration
-    all_websites = config.get_enabled_websites()
-    print(f"\n🌐 All Defined Websites: {[w['key'].value for w in all_websites]}")
-
     # Print feature-specific website configuration
     print("\n📊 Feature Website Mapping:")
     for feature in features:
