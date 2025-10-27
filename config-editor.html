@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Website Quality Evaluation - Configuration Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: #ffffff;
+            color: #333;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 2px solid #e5e5e5;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h2::before {
+            content: '▶';
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #999;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .website-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .website-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .website-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #d0d0d0;
+            transition: border-color 0.2s;
+        }
+
+        .feature-card.enabled {
+            border-color: #666;
+            background: #fafafa;
+        }
+
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .cities-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .cities-input input {
+            flex: 1;
+        }
+
+        .cities-input button {
+            padding: 10px 20px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .cities-input button:hover {
+            background: #555;
+        }
+
+        .city-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #e0e0e0;
+            color: #333;
+            border-radius: 4px;
+            margin: 5px 5px 5px 0;
+            font-size: 13px;
+        }
+
+        .city-tag button {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .city-tag button:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e5e5;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #333;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #555;
+        }
+
+        .btn-secondary {
+            background: #999;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #777;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .status-message {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #d0d0d0;
+        }
+
+        .status-message.error {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+
+        .session-links {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #d0d0d0;
+        }
+
+        .session-links h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .session-link-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .session-link-item a {
+            color: #0066cc;
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 13px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .session-link-item a:hover {
+            text-decoration: underline;
+        }
+
+        .log-viewer {
+            margin-top: 20px;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 6px;
+            border: 1px solid #333;
+            display: none;
+        }
+
+        .log-viewer h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .log-viewer-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #666;
+        }
+
+        .log-viewer-status.running {
+            background: #4caf50;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .log-content {
+            background: #0d0d0d;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 15px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            color: #00ff00;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .log-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-content::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        .log-content::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        .log-content::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        .btn-danger {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b71c1c;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hotel Website Quality Evaluation</h1>
+            <p>Configure your testing parameters, prompts, and websites</p>
+        </header>
+
+        <div class="content">
+            <div id="statusMessage" class="status-message"></div>
+
+            <!-- Test Stay -->
+            <div class="section">
+                <h2>Test Stay</h2>
+                <div class="form-group">
+                    <label>Cities to Test</label>
+                    <div class="cities-input">
+                        <input type="text" id="newCity" placeholder="Enter city name (e.g., Tokyo)">
+                        <button onclick="addCity()">Add City</button>
+                    </div>
+                    <div id="cityTags"></div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="checkinOffset">Check-in Offset (days from today)</label>
+                        <input type="number" id="checkinOffset" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="checkoutOffset">Check-out Offset (days from today)</label>
+                        <input type="number" id="checkoutOffset" value="2" min="1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="section">
+                <h2>Features to Test</h2>
+                <div id="featuresContainer"></div>
+            </div>
+
+            <!-- Site-Specific Instructions -->
+            <div class="section" id="siteInstructionsSection" style="display: none;">
+                <h2 onclick="togglePromptSection('siteInstructionsContent', 'siteInstructionsArrow')" style="cursor: pointer;">
+                    <span id="siteInstructionsArrow" style="display: inline-block; transition: transform 0.2s;">▶</span>
+                    Site-Specific Instructions
+                </h2>
+                <div class="help-text" style="margin-bottom: 15px;">Instructions provided to the browser agent for each website</div>
+
+                <div id="siteInstructionsContent" style="display: none;">
+                    <div class="form-group" id="googleTravelInstructionsGroup" style="display: none;">
+                        <label for="googleTravelInstructions">Google Travel Instructions</label>
+                        <textarea id="googleTravelInstructions"></textarea>
+                    </div>
+
+                    <div class="form-group" id="bookingComInstructionsGroup" style="display: none;">
+                        <label for="bookingComInstructions">Booking.com Instructions</label>
+                        <textarea id="bookingComInstructions"></textarea>
+                    </div>
+
+                    <div class="form-group" id="agodaInstructionsGroup" style="display: none;">
+                        <label for="agodaInstructions">Agoda Instructions</label>
+                        <textarea id="agodaInstructions"></textarea>
+                    </div>
+
+                    <div class="form-group" id="skyscannerInstructionsGroup" style="display: none;">
+                        <label for="skyscannerInstructions">Skyscanner Instructions</label>
+                        <textarea id="skyscannerInstructions"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature-Specific Prompts -->
+            <div class="section" id="featurePromptsSection" style="display: none;">
+                <h2 onclick="togglePromptSection('featurePromptsContent', 'featurePromptsArrow')" style="cursor: pointer;">
+                    <span id="featurePromptsArrow" style="display: inline-block; transition: transform 0.2s;">▶</span>
+                    Feature-Specific Prompts
+                </h2>
+                <div class="help-text" style="margin-bottom: 15px;">Define what to test for each feature. Variables: {destination}, {checkin_date}, {checkout_date}</div>
+
+                <div id="featurePromptsContent" style="display: none;">
+                    <div class="form-group" id="promptAutocompleteGroup" style="display: none;">
+                        <label for="promptAutocomplete">Autocomplete for Destinations/Hotels</label>
+                        <textarea id="promptAutocomplete"></textarea>
+                    </div>
+
+                    <div class="form-group" id="promptRelevanceGroup" style="display: none;">
+                        <label for="promptRelevance">Relevance of Top Listings</label>
+                        <textarea id="promptRelevance"></textarea>
+                    </div>
+
+                    <div class="form-group" id="promptFivePartnersGroup" style="display: none;">
+                        <label for="promptFivePartners">Five Partners Per Hotel</label>
+                        <textarea id="promptFivePartners"></textarea>
+                    </div>
+
+                    <div class="form-group" id="promptHeroPositionGroup" style="display: none;">
+                        <label for="promptHeroPosition">Hero Position Partner Mix</label>
+                        <textarea id="promptHeroPosition"></textarea>
+                    </div>
+
+                    <div class="form-group" id="promptDistanceGroup" style="display: none;">
+                        <label for="promptDistance">Distance Accuracy</label>
+                        <textarea id="promptDistance"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Prompts -->
+            <div class="section">
+                <h2 onclick="togglePromptSection('systemPromptsContent', 'systemPromptsArrow')" style="cursor: pointer;">
+                    <span id="systemPromptsArrow" style="display: inline-block; transition: transform 0.2s;">▶</span>
+                    System Prompts
+                </h2>
+                <div class="help-text" style="margin-bottom: 15px;">System prompts used by the evaluation agents</div>
+
+                <div id="systemPromptsContent" style="display: none;">
+                    <div class="form-group">
+                        <label for="browserAgentSystem">Browser Agent System Prompt</label>
+                        <textarea id="browserAgentSystem" style="min-height: 200px;"></textarea>
+                        <div class="help-text">Guides the agent during website interaction</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qualityEvaluatorSystem">Quality Evaluator System Prompt</label>
+                        <textarea id="qualityEvaluatorSystem" style="min-height: 200px;"></textarea>
+                        <div class="help-text">Analyzes and compares website recordings</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="buttons">
+                <button class="btn btn-primary" id="runButton" onclick="runEvaluation()">Save & Run</button>
+                <button class="btn btn-danger" id="stopButton" onclick="stopEvaluation()" disabled>Stop</button>
+            </div>
+
+            <!-- Log Viewer -->
+            <div id="logViewer" class="log-viewer">
+                <h3>
+                    <span class="log-viewer-status" id="logStatus"></span>
+                    Evaluation Logs
+                    <span id="logStatusText" style="font-size: 14px; color: #aaa; margin-left: auto;">Idle</span>
+                </h3>
+                <div class="log-content" id="logContent">Waiting for evaluation to start...</div>
+            </div>
+
+            <!-- Session Links (deprecated, kept for backwards compatibility) -->
+            <div id="sessionLinks" class="session-links" style="display: none;">
+                <h3>Running Sessions - Click to Monitor</h3>
+                <div id="sessionLinksContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" accept=".yaml,.yml" style="display: none;" onchange="handleFileLoad(event)">
+
+    <script>
+        // Configuration data
+        let cities = ['Tokyo'];
+
+        const features = {
+            autocomplete_for_destinations_hotels: {
+                name: 'Autocomplete for Destinations/Hotels',
+                description: 'Tests auto-complete feature for hotel destinations'
+            },
+            relevance_of_top_listings: {
+                name: 'Relevance of Top Listings',
+                description: 'Verifies top listings align with user intent'
+            },
+            five_partners_per_hotel: {
+                name: 'Five Partners Per Hotel',
+                description: 'Checks if hotels show at least 5 partner offerings (meta-search only)'
+            },
+            hero_position_partner_mix: {
+                name: 'Hero Position Partner Mix',
+                description: 'Verifies varied partner representation in top results (meta-search only)'
+            },
+            distance_accuracy: {
+                name: 'Distance Accuracy',
+                description: 'Validates distance measurements to landmarks'
+            }
+        };
+
+        const websites = ['google_travel', 'skyscanner', 'booking_com', 'agoda'];
+        const metaSearchSites = ['google_travel', 'skyscanner'];
+
+        // Default prompts
+        const defaultPrompts = {
+            siteInstructions: {
+                google_travel: `# Click the hotels icon when firstly reach Travel home page
+
+# For the calendar date picker:
+  - Year is not displayed and default to the current year. Don't try to see or change the year.
+
+# For inputting text into the search box:
+  - Before typing, use click_coordinate on the cross (X) button to clear the search box.
+
+# For hotel partners offering counting:
+    - Skip sponsored listings. They are provide by 1 partner only.`,
+                booking_com: `# Add any specific instructions for Booking.com here`,
+                agoda: `Click outside of the calendar to close it if dates are correct`,
+                skyscanner: `# Take snapshot right after the first navigation. You may be redirected to the page 'Are you a person or a robot'.
+  - Don't go to elsewhere. We must resolve the challenge.
+  - Use action human_mouse_move to the button,
+  - Then press_and_hold action to click the button for 7~12 seconds.
+  - And then must wait long enough for the page to load. MUST WAIT LONG ENOUGH.
+  - If it's longer than 2 minutes, do some more human_mouse_move and clicks.
+  - NEVER USE OTHER ACTIONS. MUST USE THESE ACTIONS TO RESOLVE THE CHALLENGE.
+
+# Check-in / Check-out date pickers:
+  - One for check-in, one for check-out. They are 2 different calanders.
+  - When you selected check-in, the check-in calander will be closed.
+  - Must take screenshot before/after every click to make sure.
+
+# Clicking a hotel card in search result page may open a new tab.
+  - Must use 'list_tabs' action after clicking a hotel card in search result page.
+  - Always close the hotel details page tab when your done checking it.
+
+# For hotel partners offer counting:
+  - MUST Click the hotel card, get into the hotel details page to count. MUST get into the hotel details page.`
+            },
+            featurePrompts: {
+                autocomplete: `Test and record interactions with the auto-complete feature for hotel destinations:
+
+Destination: {destination}
+
+Steps:
+1. Find the search box for hotel destinations and do the following:
+
+Checks:
+1. Type in City name, does the main city destination show as the first results?
+2. Type in City name check if relevant POI's show up
+3. Type in City name check if POI's are all in the same language
+4. Type in City name with typo, check if it can handle typo and show the correct city name (MUST try more then enough variations to be thorough)`,
+                relevance: `Steps:
+1. Find the destination input,
+2. Input destination: {destination}.
+3. Select check-in: {checkin_date}; check-out: {checkout_date}.
+4. Click search, wait for result.
+
+Checks:
+1. Intent Alignment Check: Verify that the top listings align with user intent (e.g. centrally located, well-reviewed, reasonably priced options appear first).
+2. Review Score Relevance Check: Confirm that top listings include hotels with strong guest scores unless filters or sorting override it.
+3. Star Rating vs Price Balance Check: Ensure that the first few listings represent a healthy mix of quality (e.g. 3–5 star) and value, rather than skewing too heavily toward one end.
+4. Repeat Search Consistency Check: Repeat the same search multiple times and check if the top listings remain consistent unless availability changes. (REFRESH THE PAGE AND SEARCH AGAIN TO MAKE SURE IT IS RENEWED)
+5. Local Context Appropriateness Check: For destination-specific searches (e.g. Tokyo city center), verify that top listings are contextually appropriate (e.g. located in Shinjuku rather than suburban outskirts).`,
+                fivePartners: `Steps:
+1. Find the destination input,
+2. Input destination: {destination}.
+3. Select check-in: {checkin_date}; check-out: {checkout_date}.
+4. Click search, wait for result.
+5. Get into first hotel details page to see partner offerings. We have partner offering displayed on the search result list, but the details page is more clearer and easier to navigate.
+
+Checks:
+1. Check first 5 hotels in hotel search results to see if >= 5 partner offering rates for each hotel. Count the number of booking partners/providers shown for each of the first 5 hotels in the search results.`,
+                heroPosition: `Steps:
+1. Find the destination input,
+2. Input destination: {destination}.
+3. Select check-in: {checkin_date}; check-out: {checkout_date}.
+4. Click search, wait for result.
+
+Checks:
+1. Top Position Partner Variation Check: Perform multiple hotel searches and verify that the top (hero) result features a varied mix of partners over time and across queries. Document which partner appears in the top position for each search.
+2. Partner Distribution Diversity Check: Check if the first few hotel cards (top 5 results) represent a healthy mix of different booking partners rather than being dominated by a single one. Count and document partner distribution.
+3. Fair Rotation Across Markets Check: Run hotel searches across multiple regions or cities and check if local and global partners are fairly represented in the hero position mix. (Try other cities then just {destination})`,
+                distance: `Steps:
+1. Find the destination input,
+2. Input destination: {destination}.
+3. Select check-in: {checkin_date}; check-out: {checkout_date}.
+4. Click search, wait for result.
+5. Check first 5 hotels.
+
+Checks:
+1. Displayed Distance to Landmark Accuracy Check: Verify that the distance shown on each hotel card accurately reflects the straight-line or walking distance to the specified reference point (e.g. city center or user-selected landmark).
+2. Landmark Reference Accuracy Check: Check that the hotel's distance is being measured from the correct reference point (e.g. central landmark or city center, not airport or other default).
+3. Unit of Measurement Check: Ensure that distances are displayed using the correct units (e.g. km or miles) based on user region or settings.`
+            },
+            browserAgentSystem: `You are a detailed web interaction recorder and observer.
+Your job is to systematically document everything you see and do while testing website features.
+
+You must use store_observation("text") to store detailed observations on every step. Store as much information as possible.
+
+## Recording Protocol:
+1. Take screenshots after every click - screenshots are the cardinal source of truth
+2. Use "click_coordinate" action with pixel coordinates to click elements based on visual analysis
+3. Dismiss pop-ups, cookie banners using coordinate clicks once you see them
+4. After clicking on search, selecting hotel, or any clicking that may trigger a new tab, check all tabs/pages we have. Ensure you're working on the correct tab
+5. Check tab list whenever screenshot fails. Working the wrong tab leads to screenshot failure.
+6. Document every click, type, hover, and navigation action with precise coordinates
+7. Record what you see: UI elements, text, buttons, forms, dropdowns, suggestions
+8. Don't leave the target website, dont' go to partners site.
+
+## What to Record:
+- **Every Interaction**: Step-by-step actions and their results
+- **UI Behavior**: How elements respond (hover effects, loading states)
+- **Content Details**: Exact text shown, placeholder text, error messages
+- **Navigation Flow**: How you move between different parts of the feature
+- **Edge Cases**: What happens with unusual inputs, empty states, errors
+
+## Output:
+Explain every step when you call tools.
+
+Structure for store_observation calls:
+## Testing Session: [Website] - [Feature]
+### Step 1: [Action]
+- **What I did**: [specific action]
+- **What I observed**: [detailed findings]
+- **Screenshot**: [describe what screenshot shows]
+
+### Step 2: [Action]
+- **What I did**: [specific action]
+- **What I observed**: [detailed findings]
+- **Screenshot**: [describe what screenshot shows]
+
+Continue for all testing steps...
+
+Store comprehensive records in memory. Be meticulous and thorough.
+Describe in detail: findings and observations.`,
+            qualityEvaluatorSystem: `You are a senior web product manager.
+Analyze the recorded observations of navigating the sites, Evaluate the features of multiple websites.
+
+Rating Definition
+1 - Terrible
+Non-functional, misleading
+2 - Very Bad
+Barely usable or broken elements
+3 - Bad
+Significant usability/content gaps
+4 - Neutral
+Works, but forgettable
+5 - Good
+Solid experience, few flaws
+6 - Very Good
+Polished and competitive
+7 - Excellent
+Best-in-class; highly competitive
+
+## Output Template
+# Checking Steps
+## General Steps Taken
+- Destination: [e.g. Barcelona (May visit multiple cities, here for the main city)]
+- Check-in: [e.g. 2024-09-20], Check-out: [e.g. 2024-09-21]
+- [Other steps]
+
+## Differences Steps Between Sites
+- [e.g. Skyscanner has 2 separate inputs for check-in and check-out, Google Travel has a single date range picker]
+- [e.g. Booking.com requires closing a pop-up]
+
+Concise summary of steps taken, general steps and differences between sites.
+
+# Feature: [Feature Name Being Tested]
+| Checks   | Skyscanner | (Website 2) | (and so on) |
+|-----------|------------------------------|-------------------------------|-------------|
+| Check 1 | [Rating]/7 – Rationale              | [Rating]/7 – Rationale                | (and so on) |
+| Check 2 | [Rating]/7 – Rationale             | [Rating]/7 – Rationale                | (and so on) |
+| Overall rating (last row) | [Rating]/7 – Rationale             | [Rating]/7 – Rationale                | (and so on) |
+
+# Summary
+- **Skyscanner**
+  - standout strengths
+  - drawbacks
+- **Booking.com**
+  - standout strengths
+  - drawbacks`
+        };
+
+        // Initialize
+        function init() {
+            renderCityTags();
+            renderFeatures();
+            initializePrompts();
+        }
+
+        function initializePrompts() {
+            // Site instructions
+            document.getElementById('googleTravelInstructions').value = defaultPrompts.siteInstructions.google_travel;
+            document.getElementById('bookingComInstructions').value = defaultPrompts.siteInstructions.booking_com;
+            document.getElementById('agodaInstructions').value = defaultPrompts.siteInstructions.agoda;
+            document.getElementById('skyscannerInstructions').value = defaultPrompts.siteInstructions.skyscanner;
+
+            // Feature prompts
+            document.getElementById('promptAutocomplete').value = defaultPrompts.featurePrompts.autocomplete;
+            document.getElementById('promptRelevance').value = defaultPrompts.featurePrompts.relevance;
+            document.getElementById('promptFivePartners').value = defaultPrompts.featurePrompts.fivePartners;
+            document.getElementById('promptHeroPosition').value = defaultPrompts.featurePrompts.heroPosition;
+            document.getElementById('promptDistance').value = defaultPrompts.featurePrompts.distance;
+
+            // System prompts
+            document.getElementById('browserAgentSystem').value = defaultPrompts.browserAgentSystem;
+            document.getElementById('qualityEvaluatorSystem').value = defaultPrompts.qualityEvaluatorSystem;
+        }
+
+        // Toggle prompt section content visibility with arrow rotation
+        function togglePromptSection(contentId, arrowId) {
+            const content = document.getElementById(contentId);
+            const arrow = document.getElementById(arrowId);
+            const isHidden = content.style.display === 'none';
+
+            content.style.display = isHidden ? 'block' : 'none';
+            arrow.textContent = isHidden ? '▼' : '▶';
+        }
+
+        // City management
+        function addCity() {
+            const input = document.getElementById('newCity');
+            const city = input.value.trim();
+            if (city && !cities.includes(city)) {
+                cities.push(city);
+                renderCityTags();
+                input.value = '';
+            }
+        }
+
+        function removeCity(city) {
+            cities = cities.filter(c => c !== city);
+            renderCityTags();
+        }
+
+        function renderCityTags() {
+            const container = document.getElementById('cityTags');
+            container.innerHTML = cities.map(city => `
+                <span class="city-tag">
+                    ${city}
+                    <button onclick="removeCity('${city}')" title="Remove">&times;</button>
+                </span>
+            `).join('');
+        }
+
+        // Feature rendering
+        function renderFeatures() {
+            const container = document.getElementById('featuresContainer');
+            container.innerHTML = Object.keys(features).map(key => {
+                const feature = features[key];
+                const isMetaSearchOnly = key === 'five_partners_per_hotel' || key === 'hero_position_partner_mix';
+                const availableWebsites = isMetaSearchOnly ? metaSearchSites : websites;
+
+                return `
+                    <div class="feature-card" id="feature-${key}">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enabled-${key}" onchange="toggleFeature('${key}')">
+                            <label for="enabled-${key}">${feature.name}</label>
+                        </div>
+                        <div class="help-text" style="margin-bottom: 15px;">${feature.description}</div>
+
+                        <div id="websites-${key}" style="display: none;">
+                            <label>Run on websites: ${isMetaSearchOnly ? '(Meta-search sites only)' : ''}</label>
+                            <div class="website-checkboxes">
+                                <div class="website-checkbox">
+                                    <input type="checkbox" id="all-websites-${key}" onchange="toggleAllWebsites('${key}')" checked>
+                                    <label for="all-websites-${key}">All Websites</label>
+                                </div>
+                                ${availableWebsites.map(site => `
+                                    <div class="website-checkbox">
+                                        <input type="checkbox" id="website-${key}-${site}" onchange="updateWebsiteSelection('${key}')" disabled>
+                                        <label for="website-${key}-${site}">${formatWebsiteName(site)}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleFeature(key) {
+            const enabled = document.getElementById(`enabled-${key}`).checked;
+            const card = document.getElementById(`feature-${key}`);
+            const websitesDiv = document.getElementById(`websites-${key}`);
+
+            if (enabled) {
+                card.classList.add('enabled');
+                websitesDiv.style.display = 'block';
+            } else {
+                card.classList.remove('enabled');
+                websitesDiv.style.display = 'none';
+            }
+
+            updatePromptVisibility();
+        }
+
+        function toggleAllWebsites(featureKey) {
+            const allCheckbox = document.getElementById(`all-websites-${featureKey}`);
+            const isMetaSearchOnly = featureKey === 'five_partners_per_hotel' || featureKey === 'hero_position_partner_mix';
+            const availableWebsites = isMetaSearchOnly ? metaSearchSites : websites;
+
+            availableWebsites.forEach(site => {
+                const checkbox = document.getElementById(`website-${featureKey}-${site}`);
+                checkbox.disabled = allCheckbox.checked;
+                if (allCheckbox.checked) {
+                    checkbox.checked = false;
+                }
+            });
+
+            updatePromptVisibility();
+        }
+
+        function updateWebsiteSelection(featureKey) {
+            const isMetaSearchOnly = featureKey === 'five_partners_per_hotel' || featureKey === 'hero_position_partner_mix';
+            const availableWebsites = isMetaSearchOnly ? metaSearchSites : websites;
+            const anyChecked = availableWebsites.some(site =>
+                document.getElementById(`website-${featureKey}-${site}`).checked
+            );
+
+            if (anyChecked) {
+                document.getElementById(`all-websites-${featureKey}`).checked = false;
+            }
+
+            updatePromptVisibility();
+        }
+
+        // Update visibility of prompt sections based on enabled features and selected websites
+        function updatePromptVisibility() {
+            // Map features to their prompt elements
+            const featureToPrompt = {
+                'autocomplete_for_destinations_hotels': 'promptAutocompleteGroup',
+                'relevance_of_top_listings': 'promptRelevanceGroup',
+                'five_partners_per_hotel': 'promptFivePartnersGroup',
+                'hero_position_partner_mix': 'promptHeroPositionGroup',
+                'distance_accuracy': 'promptDistanceGroup'
+            };
+
+            // Check which features are enabled
+            let anyFeatureEnabled = false;
+            Object.keys(featureToPrompt).forEach(featureKey => {
+                const enabled = document.getElementById(`enabled-${featureKey}`).checked;
+                const promptGroup = document.getElementById(featureToPrompt[featureKey]);
+
+                if (enabled) {
+                    promptGroup.style.display = 'block';
+                    anyFeatureEnabled = true;
+                } else {
+                    promptGroup.style.display = 'none';
+                }
+            });
+
+            // Show/hide Feature-Specific Prompts section
+            document.getElementById('featurePromptsSection').style.display = anyFeatureEnabled ? 'block' : 'none';
+
+            // Get all selected websites across all enabled features
+            const selectedWebsites = new Set();
+            Object.keys(features).forEach(featureKey => {
+                const enabled = document.getElementById(`enabled-${featureKey}`).checked;
+                if (enabled) {
+                    const allWebsites = document.getElementById(`all-websites-${featureKey}`).checked;
+                    const isMetaSearchOnly = featureKey === 'five_partners_per_hotel' || featureKey === 'hero_position_partner_mix';
+                    const availableWebsites = isMetaSearchOnly ? metaSearchSites : websites;
+
+                    if (allWebsites) {
+                        availableWebsites.forEach(site => selectedWebsites.add(site));
+                    } else {
+                        availableWebsites.forEach(site => {
+                            if (document.getElementById(`website-${featureKey}-${site}`).checked) {
+                                selectedWebsites.add(site);
+                            }
+                        });
+                    }
+                }
+            });
+
+            // Show/hide site instruction textareas based on selected websites
+            const siteToInstructionGroup = {
+                'google_travel': 'googleTravelInstructionsGroup',
+                'booking_com': 'bookingComInstructionsGroup',
+                'agoda': 'agodaInstructionsGroup',
+                'skyscanner': 'skyscannerInstructionsGroup'
+            };
+
+            let anySiteSelected = false;
+            Object.keys(siteToInstructionGroup).forEach(site => {
+                const instructionGroup = document.getElementById(siteToInstructionGroup[site]);
+                if (selectedWebsites.has(site)) {
+                    instructionGroup.style.display = 'block';
+                    anySiteSelected = true;
+                } else {
+                    instructionGroup.style.display = 'none';
+                }
+            });
+
+            // Show/hide Site-Specific Instructions section
+            document.getElementById('siteInstructionsSection').style.display = anySiteSelected ? 'block' : 'none';
+        }
+
+        function formatWebsiteName(key) {
+            return key.split('_').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
+
+        // Generate YAML
+        function generateYAML() {
+            const config = {
+                browser: {
+                    browser_id: "recordingBrowserEuWest1-xlOMHocyL3",
+                    session_timeout: 7200,
+                    region: "eu-west-1"
+                },
+                model: {
+                    model_id: "eu.anthropic.claude-sonnet-4-20250514-v1:0",
+                    region_name: "eu-west-1",
+                    temperature: 0.1
+                },
+                test_parameters: {
+                    cities: cities,
+                    checkin_checkout: {
+                        next_day_one_night: {
+                            checkin_offset: parseInt(document.getElementById('checkinOffset').value),
+                            checkout_offset: parseInt(document.getElementById('checkoutOffset').value)
+                        }
+                    }
+                },
+                websites: {
+                    google_travel: { url: "https://www.google.com/travel/" },
+                    agoda: { url: "https://www.agoda.com" },
+                    booking_com: { url: "https://www.booking.com" },
+                    skyscanner: { url: "https://www.skyscanner.com/hotels" }
+                },
+                features: {}
+            };
+
+            // Collect enabled features and their website selections
+            Object.keys(features).forEach(key => {
+                const enabled = document.getElementById(`enabled-${key}`).checked;
+                const allWebsites = document.getElementById(`all-websites-${key}`).checked;
+                const isMetaSearchOnly = key === 'five_partners_per_hotel' || key === 'hero_position_partner_mix';
+                const availableWebsites = isMetaSearchOnly ? metaSearchSites : websites;
+
+                let selectedWebsites = [];
+                if (!allWebsites) {
+                    selectedWebsites = availableWebsites.filter(site =>
+                        document.getElementById(`website-${key}-${site}`).checked
+                    );
+                }
+
+                config.features[key] = {
+                    enabled: enabled,
+                    websites: selectedWebsites
+                };
+            });
+
+            // Add site instructions
+            config.site_instructions = {
+                google_travel: document.getElementById('googleTravelInstructions').value,
+                booking_com: document.getElementById('bookingComInstructions').value,
+                agoda: document.getElementById('agodaInstructions').value,
+                skyscanner: document.getElementById('skyscannerInstructions').value
+            };
+
+            // Add feature prompts
+            config.feature_prompts = {
+                autocomplete_for_destinations_hotels: document.getElementById('promptAutocomplete').value,
+                relevance_of_top_listings: document.getElementById('promptRelevance').value,
+                five_partners_per_hotel: document.getElementById('promptFivePartners').value,
+                hero_position_partner_mix: document.getElementById('promptHeroPosition').value,
+                distance_accuracy: document.getElementById('promptDistance').value
+            };
+
+            // Add system prompts
+            config.prompts = {
+                browser_agent_system: document.getElementById('browserAgentSystem').value,
+                quality_evaluator_system: document.getElementById('qualityEvaluatorSystem').value
+            };
+
+            // Add output settings
+            config.output = {
+                base_directory: "quality_evaluation_output",
+                text_recording_dir: "text_recording",
+                comparison_analysis_dir: "comparison_analysis"
+            };
+
+            return objectToYAML(config);
+        }
+
+        // Simple YAML converter
+        function objectToYAML(obj, indent = 0, parentKey = '') {
+            let yaml = '';
+            const spaces = '  '.repeat(indent);
+            const multilineKeys = ['site_instructions', 'feature_prompts', 'prompts'];
+
+            for (const [key, value] of Object.entries(obj)) {
+                if (value === null || value === undefined) {
+                    yaml += `${spaces}${key}: null\n`;
+                } else if (Array.isArray(value)) {
+                    if (value.length === 0) {
+                        yaml += `${spaces}${key}: []\n`;
+                    } else {
+                        yaml += `${spaces}${key}:\n`;
+                        value.forEach(item => {
+                            if (typeof item === 'object') {
+                                yaml += `${spaces}  - ${objectToYAML(item, indent + 2).trim()}\n`;
+                            } else {
+                                yaml += `${spaces}  - "${item}"\n`;
+                            }
+                        });
+                    }
+                } else if (typeof value === 'object') {
+                    yaml += `${spaces}${key}:\n`;
+                    yaml += objectToYAML(value, indent + 1, key);
+                } else if (typeof value === 'string') {
+                    // Check if this should be a multi-line string
+                    if (multilineKeys.includes(parentKey) && value.includes('\n')) {
+                        yaml += `${spaces}${key}: |\n`;
+                        const lines = value.split('\n');
+                        lines.forEach(line => {
+                            yaml += `${spaces}  ${line}\n`;
+                        });
+                    } else {
+                        yaml += `${spaces}${key}: "${value}"\n`;
+                    }
+                } else {
+                    yaml += `${spaces}${key}: ${value}\n`;
+                }
+            }
+
+            return yaml;
+        }
+
+        // Polling state
+        let logPollInterval = null;
+        let autoScroll = true;
+
+        // Run evaluation - save config and start process
+        async function runEvaluation() {
+            try {
+                // Generate YAML
+                const yaml = generateYAML();
+
+                // Save config to server
+                const saveResponse = await fetch('/api/save-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ yaml: yaml })
+                });
+
+                const saveResult = await saveResponse.json();
+
+                if (!saveResult.success) {
+                    showStatus('Error saving config: ' + saveResult.error, 'error');
+                    return;
+                }
+
+                // Start evaluation
+                const startResponse = await fetch('/api/start', {
+                    method: 'POST'
+                });
+
+                const startResult = await startResponse.json();
+
+                if (!startResult.success) {
+                    showStatus('Error starting evaluation: ' + startResult.error, 'error');
+                    return;
+                }
+
+                // Show log viewer
+                document.getElementById('logViewer').style.display = 'block';
+                document.getElementById('logContent').textContent = 'Starting evaluation...\n';
+
+                // Enable/disable buttons
+                document.getElementById('runButton').disabled = true;
+                document.getElementById('stopButton').disabled = false;
+
+                // Update status
+                updateStatusDisplay('running');
+
+                // Start polling logs
+                startLogPolling();
+
+                showStatus('Evaluation started successfully!', 'success');
+
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Stop evaluation
+        async function stopEvaluation() {
+            try {
+                const response = await fetch('/api/stop', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    showStatus('Error stopping evaluation: ' + result.error, 'error');
+                    return;
+                }
+
+                // Stop polling
+                stopLogPolling();
+
+                // Update buttons
+                document.getElementById('runButton').disabled = false;
+                document.getElementById('stopButton').disabled = true;
+
+                // Update status
+                updateStatusDisplay('stopped');
+
+                showStatus('Evaluation stopped', 'success');
+
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Start polling logs
+        function startLogPolling() {
+            if (logPollInterval) return;
+
+            // Poll every 2 seconds
+            logPollInterval = setInterval(async () => {
+                await fetchLogs();
+                await checkStatus();
+            }, 2000);
+
+            // Fetch immediately
+            fetchLogs();
+        }
+
+        // Stop polling logs
+        function stopLogPolling() {
+            if (logPollInterval) {
+                clearInterval(logPollInterval);
+                logPollInterval = null;
+            }
+        }
+
+        // Fetch logs from server
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/api/logs');
+                const result = await response.json();
+
+                if (result.exists && result.content) {
+                    const logContent = document.getElementById('logContent');
+                    const shouldScroll = autoScroll && (
+                        logContent.scrollHeight - logContent.scrollTop - logContent.clientHeight < 100
+                    );
+
+                    logContent.textContent = result.content;
+
+                    if (shouldScroll) {
+                        logContent.scrollTop = logContent.scrollHeight;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+            }
+        }
+
+        // Check process status
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const result = await response.json();
+
+                if (!result.running && logPollInterval) {
+                    // Process finished
+                    stopLogPolling();
+                    document.getElementById('runButton').disabled = false;
+                    document.getElementById('stopButton').disabled = true;
+
+                    if (result.status === 'completed') {
+                        updateStatusDisplay('completed');
+                        showStatus('Evaluation completed successfully!', 'success');
+                    } else if (result.status === 'error') {
+                        updateStatusDisplay('error');
+                        showStatus('Evaluation finished with errors. Check logs for details.', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+        }
+
+        // Update status display
+        function updateStatusDisplay(status) {
+            const statusEl = document.getElementById('logStatus');
+            const statusText = document.getElementById('logStatusText');
+
+            statusEl.className = 'log-viewer-status';
+
+            switch (status) {
+                case 'running':
+                    statusEl.classList.add('running');
+                    statusText.textContent = 'Running';
+                    statusText.style.color = '#4caf50';
+                    break;
+                case 'completed':
+                    statusText.textContent = 'Completed';
+                    statusText.style.color = '#4caf50';
+                    break;
+                case 'error':
+                    statusText.textContent = 'Error';
+                    statusText.style.color = '#f44336';
+                    break;
+                case 'stopped':
+                    statusText.textContent = 'Stopped';
+                    statusText.style.color = '#ff9800';
+                    break;
+                default:
+                    statusText.textContent = 'Idle';
+                    statusText.style.color = '#aaa';
+            }
+        }
+
+
+        // Download YAML (kept for potential future use)
+        function generateAndDownload() {
+            try {
+                const yaml = generateYAML();
+                const blob = new Blob([yaml], { type: 'text/yaml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'config.yaml';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showStatus('Configuration exported successfully!', 'success');
+            } catch (error) {
+                showStatus('Error generating YAML: ' + error.message, 'error');
+            }
+        }
+
+        // Load from file
+        function loadFromFile() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileLoad(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        parseYAMLAndPopulate(e.target.result);
+                        showStatus('Configuration loaded successfully!', 'success');
+                    } catch (error) {
+                        showStatus('Error loading config: ' + error.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseYAMLAndPopulate(yamlText) {
+            // This is a simplified parser - for production, use a proper YAML library
+            const lines = yamlText.split('\n');
+            let currentSection = null;
+
+            // Reset cities
+            cities = [];
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+
+                // Parse cities
+                if (trimmed.startsWith('- "') && currentSection === 'cities') {
+                    const city = trimmed.match(/- "(.+)"/)?.[1];
+                    if (city) cities.push(city);
+                }
+
+                // Track sections
+                if (trimmed === 'cities:') currentSection = 'cities';
+                else if (trimmed && !trimmed.startsWith('-') && trimmed.includes(':')) currentSection = null;
+
+                // Parse simple values
+                if (trimmed.includes('browser_id:')) {
+                    const value = trimmed.split('browser_id:')[1].trim().replace(/"/g, '');
+                    document.getElementById('browserId').value = value;
+                }
+                // Add more parsing as needed...
+            });
+
+            renderCityTags();
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>

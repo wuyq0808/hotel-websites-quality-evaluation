@@ -7,6 +7,7 @@ Uses prompt-based evaluation by invoking the browser evaluation method
 import json
 import logging
 import sys
+import signal
 from datetime import datetime, timezone
 
 from strands import Agent
@@ -16,7 +17,25 @@ from strands_browser_direct import evaluate_website_feature
 from config_loader import get_config, Feature, WebsiteKey
 from aws_credential_setup import setup_credentials, verify_binaries
 
-logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
+# Configure logging with immediate flush
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
+
+# Force stdout to be unbuffered for real-time log viewing
+sys.stdout.reconfigure(line_buffering=True)
+
+# Global flag for graceful shutdown
+shutdown_requested = False
+
+def signal_handler(signum, frame):
+    """Handle SIGTERM for graceful shutdown"""
+    global shutdown_requested
+    print("\n⚠️  Shutdown signal received. Stopping evaluation gracefully...")
+    sys.stdout.flush()
+    shutdown_requested = True
 
 # Load configuration
 config = get_config()
@@ -32,6 +51,7 @@ def process_and_save_result(website_key, result, feature_key=None, city=None, ch
         print(result)
     else:
         print(f"❌ {result}")
+    sys.stdout.flush()
 
     # Convert to string values for filename
     website_key_str = website_key.value
@@ -61,6 +81,7 @@ def process_and_save_result(website_key, result, feature_key=None, city=None, ch
         f.write(str(result))
 
     print(f"📄 Results saved to: {filepath}")
+    sys.stdout.flush()
 
 
 def create_quality_evaluator():
@@ -91,11 +112,19 @@ def create_quality_evaluator():
 
 def execute_website_evaluations(websites, feature_instruction, feature_key=None, city=None, checkin_checkout_offset=None):
     """Execute evaluations for all websites sequentially"""
+    global shutdown_requested
     results = {}
 
     for website in websites:
+        # Check for shutdown signal
+        if shutdown_requested:
+            print("🛑 Shutdown requested. Skipping remaining websites.")
+            sys.stdout.flush()
+            break
+
         website_url = website['url']
         print(f"🔄 Starting evaluation for {website_url}")
+        sys.stdout.flush()
 
         try:
             feature_prompt = f"""Navigate to {website_url} and execute the following:
@@ -112,12 +141,14 @@ def execute_website_evaluations(websites, feature_instruction, feature_key=None,
             result = retrying(evaluate_website_feature, feature_prompt, website_key=website.get('key'))
             results[website_url] = result
             print(f"✅ Completed evaluation for {website_url}")
+            sys.stdout.flush()
 
             # Process and save result immediately
             process_and_save_result(website.get('key'), result, feature_key, city, checkin_checkout_offset)
 
         except Exception as exc:
             print(f"❌ {website_url} generated an exception: {exc}")
+            sys.stdout.flush()
             error_result = f"Error: {exc}"
             results[website_url] = error_result
 
@@ -129,7 +160,14 @@ def execute_website_evaluations(websites, feature_instruction, feature_key=None,
 
 def generate_feature_comparison(feature, feature_instruction, websites, results, city=None, checkin_checkout_offset=None):
     """Generate comparison analysis using QualityEvaluator agent"""
+    global shutdown_requested
+    if shutdown_requested:
+        print("🛑 Shutdown requested. Skipping comparison analysis.")
+        sys.stdout.flush()
+        return
+
     print("\n🤖 Generating comparison analysis...")
+    sys.stdout.flush()
     evaluator = create_quality_evaluator()
 
     # Build comparison prompt for all websites
@@ -181,6 +219,7 @@ Recording Results from executing the above checks:
         f.write(str(comparison_result))
 
     print(f"📄 Comparison analysis saved to: {comparison_filepath}")
+    sys.stdout.flush()
 
 
 
@@ -197,19 +236,34 @@ def get_feature_prompt(feature, destination, checkin_date, checkout_date):
 
 def run_evaluations(features, cities, checkin_date, checkout_date, checkin_checkout_offset):
     """Main evaluation loop - runs all features for all cities"""
+    global shutdown_requested
+
     # Loop through all cities
     for city in cities:
+        if shutdown_requested:
+            print("🛑 Shutdown requested. Stopping evaluation.")
+            sys.stdout.flush()
+            break
+
         print(f"\n🏙️ Starting evaluation for city: {city}")
+        sys.stdout.flush()
 
         # Loop through all features for each city
         for feature in features:
+            if shutdown_requested:
+                print("🛑 Shutdown requested. Stopping evaluation.")
+                sys.stdout.flush()
+                break
+
             print(f"\n🚀 Testing feature: {feature.value}")
+            sys.stdout.flush()
 
             feature_instruction = get_feature_prompt(feature, city, checkin_date, checkout_date)
             feature_websites = get_feature_websites(feature)
 
             if not feature_websites:
                 print(f"⚠️ No websites enabled for feature {feature.value}")
+                sys.stdout.flush()
                 continue
 
             # Execute evaluations sequentially
@@ -219,12 +273,21 @@ def run_evaluations(features, cities, checkin_date, checkout_date, checkin_check
             generate_feature_comparison(feature, feature_instruction, feature_websites, results, city, checkin_checkout_offset)
 
             print(f"✅ Completed feature: {feature.value} for city: {city}")
+            sys.stdout.flush()
 
         print(f"✅ Completed all features for city: {city}")
+        sys.stdout.flush()
 
-    print("\n" + "=" * 80)
-    print("🎉 All evaluations completed successfully!")
-    print("=" * 80)
+    if shutdown_requested:
+        print("\n" + "=" * 80)
+        print("⚠️  Evaluation stopped by user")
+        print("=" * 80)
+        sys.stdout.flush()
+    else:
+        print("\n" + "=" * 80)
+        print("🎉 All evaluations completed successfully!")
+        print("=" * 80)
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":
@@ -232,32 +295,43 @@ if __name__ == "__main__":
     from datetime import datetime, timedelta
     from strands_browser_direct import evaluate_website_feature
 
+    # Register signal handler for graceful shutdown
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
     # Print configuration on startup
     print("=" * 80)
     print("🚀 Quality Evaluation Tool - Configuration")
     print("=" * 80)
+    sys.stdout.flush()
 
     # Setup AWS credentials (first-time setup if needed)
     print("\n🔐 Setting up AWS credentials...")
+    sys.stdout.flush()
     try:
         if not verify_binaries():
             print("❌ Error: AWS authentication binaries not found")
             print("   This is a packaging issue. Please contact the developer.")
+            sys.stdout.flush()
             sys.exit(1)
 
         setup_credentials()
         print("✅ AWS credentials configured\n")
+        sys.stdout.flush()
     except Exception as e:
         print(f"❌ Error setting up AWS credentials: {e}")
         print("   Please check your network connection and try again.")
+        sys.stdout.flush()
         sys.exit(1)
 
     # Get features from config
     features = config.get_enabled_features()
     print(f"\n📋 Enabled Features: {[f.value for f in features]}")
+    sys.stdout.flush()
 
     if not features:
         print("❌ No features enabled in config.yaml")
+        sys.stdout.flush()
         sys.exit(1)
 
     # Print feature-specific website configuration
@@ -270,8 +344,10 @@ if __name__ == "__main__":
                 print(f"    - {website['key'].value}: {website['url']}")
         else:
             print(f"    - No websites configured")
+    sys.stdout.flush()
 
     print("\n" + "=" * 80 + "\n")
+    sys.stdout.flush()
 
     # Get checkin_checkout offset from config
     checkin_checkout_offset = config.get_checkin_checkout_offset()
@@ -287,7 +363,11 @@ if __name__ == "__main__":
 
     if not cities:
         print("❌ No cities configured in config.yaml")
+        sys.stdout.flush()
         sys.exit(1)
 
     # Run evaluations
     run_evaluations(features, cities, checkin_date, checkout_date, checkin_checkout_offset)
+
+    # Exit with appropriate code
+    sys.exit(0 if not shutdown_requested else 1)

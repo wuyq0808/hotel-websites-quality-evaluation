@@ -7,3 +7,4 @@ nest-asyncio
 tenacity>=8.0.0
 boto3>=1.26.0
 playwright>=1.40.0
+flask>=2.3.0
