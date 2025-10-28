@@ -69,7 +69,7 @@ websites:
 features:
   autocomplete_for_destinations_hotels:
     enabled: true
-    websites: []  # Empty = all defined websites
+    websites: [skyscanner, google_travel]  # Empty = all defined websites
 
   relevance_of_top_listings:
     enabled: false

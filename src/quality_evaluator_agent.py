@@ -7,7 +7,6 @@ Uses prompt-based evaluation by invoking the browser evaluation method
 import json
 import logging
 import sys
-import signal
 from datetime import datetime, timezone
 
 from strands import Agent
@@ -20,22 +19,12 @@ from aws_credential_setup import setup_credentials, verify_binaries
 # Configure logging with immediate flush
 logging.basicConfig(
     level=logging.INFO,
-    format='%(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     stream=sys.stdout
 )
 
 # Force stdout to be unbuffered for real-time log viewing
 sys.stdout.reconfigure(line_buffering=True)
-
-# Global flag for graceful shutdown
-shutdown_requested = False
-
-def signal_handler(signum, frame):
-    """Handle SIGTERM for graceful shutdown"""
-    global shutdown_requested
-    print("\n⚠️  Shutdown signal received. Stopping evaluation gracefully...")
-    sys.stdout.flush()
-    shutdown_requested = True
 
 # Load configuration
 config = get_config()
@@ -112,16 +101,9 @@ def create_quality_evaluator():
 
 def execute_website_evaluations(websites, feature_instruction, feature_key=None, city=None, checkin_checkout_offset=None):
     """Execute evaluations for all websites sequentially"""
-    global shutdown_requested
     results = {}
 
     for website in websites:
-        # Check for shutdown signal
-        if shutdown_requested:
-            print("🛑 Shutdown requested. Skipping remaining websites.")
-            sys.stdout.flush()
-            break
-
         website_url = website['url']
         print(f"🔄 Starting evaluation for {website_url}")
         sys.stdout.flush()
@@ -160,12 +142,6 @@ def execute_website_evaluations(websites, feature_instruction, feature_key=None,
 
 def generate_feature_comparison(feature, feature_instruction, websites, results, city=None, checkin_checkout_offset=None):
     """Generate comparison analysis using QualityEvaluator agent"""
-    global shutdown_requested
-    if shutdown_requested:
-        print("🛑 Shutdown requested. Skipping comparison analysis.")
-        sys.stdout.flush()
-        return
-
     print("\n🤖 Generating comparison analysis...")
     sys.stdout.flush()
     evaluator = create_quality_evaluator()
@@ -236,25 +212,13 @@ def get_feature_prompt(feature, destination, checkin_date, checkout_date):
 
 def run_evaluations(features, cities, checkin_date, checkout_date, checkin_checkout_offset):
     """Main evaluation loop - runs all features for all cities"""
-    global shutdown_requested
-
     # Loop through all cities
     for city in cities:
-        if shutdown_requested:
-            print("🛑 Shutdown requested. Stopping evaluation.")
-            sys.stdout.flush()
-            break
-
         print(f"\n🏙️ Starting evaluation for city: {city}")
         sys.stdout.flush()
 
         # Loop through all features for each city
         for feature in features:
-            if shutdown_requested:
-                print("🛑 Shutdown requested. Stopping evaluation.")
-                sys.stdout.flush()
-                break
-
             print(f"\n🚀 Testing feature: {feature.value}")
             sys.stdout.flush()
 
@@ -278,26 +242,16 @@ def run_evaluations(features, cities, checkin_date, checkout_date, checkin_check
         print(f"✅ Completed all features for city: {city}")
         sys.stdout.flush()
 
-    if shutdown_requested:
-        print("\n" + "=" * 80)
-        print("⚠️  Evaluation stopped by user")
-        print("=" * 80)
-        sys.stdout.flush()
-    else:
-        print("\n" + "=" * 80)
-        print("🎉 All evaluations completed successfully!")
-        print("=" * 80)
-        sys.stdout.flush()
+    print("\n" + "=" * 80)
+    print("🎉 All evaluations completed successfully!")
+    print("=" * 80)
+    sys.stdout.flush()
 
 
 if __name__ == "__main__":
     import concurrent.futures
     from datetime import datetime, timedelta
     from strands_browser_direct import evaluate_website_feature
-
-    # Register signal handler for graceful shutdown
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
 
     # Print configuration on startup
     print("=" * 80)
@@ -369,5 +323,5 @@ if __name__ == "__main__":
     # Run evaluations
     run_evaluations(features, cities, checkin_date, checkout_date, checkin_checkout_offset)
 
-    # Exit with appropriate code
-    sys.exit(0 if not shutdown_requested else 1)
+    # Exit successfully
+    sys.exit(0)
