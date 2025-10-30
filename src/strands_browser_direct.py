@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Direct Strands Agent with AgentCore Browser Tools
-LLM gets direct access to browser tools - no custom navigation code
+Direct Strands Agent with ReBrowser Playwright Tools
+LLM gets direct access to browser tools with stealth capabilities
 """
 
 import json
@@ -9,7 +9,7 @@ from datetime import datetime
 
 from strands import Agent, tool
 from strands.models import BedrockModel
-from custom_browser import CustomAgentCoreBrowser
+from rebrowser_playwright_tool import ReBrowserPlaywrightTool
 from config_loader import get_config, WebsiteKey
 
 # Load configuration
@@ -38,12 +38,8 @@ def evaluate_website_feature(feature_instruction, website_key):
         observations.append(text)
         return f"Stored: {text[:50]}..."
 
-    # Configure browser tool from config
-    browser_tool = CustomAgentCoreBrowser(
-        region=config.get_browser_region(),
-        identifier=config.get_browser_id(),
-        session_timeout=config.get_browser_session_timeout(),
-    )
+    # Configure ReBrowser Playwright tool (no config needed - runs locally)
+    browser_tool = ReBrowserPlaywrightTool()
 
     # Create explicit Bedrock model from config
     bedrock_model = BedrockModel(

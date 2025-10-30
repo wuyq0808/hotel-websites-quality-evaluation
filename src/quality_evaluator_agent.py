@@ -4,10 +4,12 @@ Quality Evaluator Agent - No Tools
 Uses prompt-based evaluation by invoking the browser evaluation method
 """
 
+import concurrent.futures
 import json
 import logging
+import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from strands import Agent
 from strands.models import BedrockModel
@@ -31,9 +33,6 @@ config = get_config()
 
 def process_and_save_result(website_key, result, feature_key=None, city=None, checkin_checkout_offset=None):
     """Process and save a single recording result"""
-    import os
-    import sys
-
     print(f"\n🌐 Website: {website_key}")
     print("-" * 40)
     if isinstance(result, str) and "Error:" not in result:
@@ -169,9 +168,6 @@ Recording Results from executing the above checks:
     comparison_result = evaluator(comparison_prompt)
 
     # Save comparison to file with full hierarchy: feature/city/checkin_checkout
-    import os
-    import sys
-
     # Always use current working directory
     base_dir = os.getcwd()
 
@@ -249,10 +245,6 @@ def run_evaluations(features, cities, checkin_date, checkout_date, checkin_check
 
 
 if __name__ == "__main__":
-    import concurrent.futures
-    from datetime import datetime, timedelta
-    from strands_browser_direct import evaluate_website_feature
-
     # Print configuration on startup
     print("=" * 80)
     print("🚀 Quality Evaluation Tool - Configuration")

@@ -78,18 +78,7 @@ class ConfigLoader:
     # =========================================================================
     # Browser & Model Settings
     # =========================================================================
-
-    def get_browser_id(self) -> str:
-        """Get AgentCore browser identifier"""
-        return self.config['browser']['browser_id']
-
-    def get_browser_session_timeout(self) -> int:
-        """Get browser session timeout in seconds"""
-        return self.config['browser']['session_timeout']
-
-    def get_browser_region(self) -> str:
-        """Get AWS region for browser service"""
-        return self.config['browser']['region']
+    # Browser config removed - now using local ReBrowser Playwright (no AWS config needed)
 
     def get_model_id(self) -> str:
         """Get Bedrock model ID"""

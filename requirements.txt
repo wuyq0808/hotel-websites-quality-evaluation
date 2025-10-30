@@ -1,10 +1,7 @@
 # Quality Evaluation Dependencies
 pyyaml>=6.0
 strands-agents
-strands-agents-tools
-bedrock-agentcore
 nest-asyncio
 tenacity>=8.0.0
 boto3>=1.26.0
-playwright>=1.40.0
-flask>=2.3.0
+rebrowser-playwright>=1.40.0

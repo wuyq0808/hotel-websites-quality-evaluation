@@ -14,7 +14,6 @@ block_cipher = None
 
 # Collect all strands-related modules
 strands_hiddenimports = collect_submodules('strands')
-strands_tools_hiddenimports = collect_submodules('strands_tools')
 
 # Additional hidden imports that PyInstaller might miss
 hidden_imports = [
@@ -22,20 +21,48 @@ hidden_imports = [
     'tenacity',
     'boto3',
     'botocore',
-    'playwright',
+    'rebrowser_playwright',
+    'rebrowser_playwright.sync_api',
+    'rebrowser_playwright.async_api',
     'strands',
     'strands.models',
-    'strands_tools.browser',
-    'strands_tools.browser.models',
     'enum',
     'logging',
     'json',
     'datetime',
-] + strands_hiddenimports + strands_tools_hiddenimports
+    'nest_asyncio',
+] + strands_hiddenimports
 
 # Data files to include
 # Note: config.yaml should NOT be bundled - it needs to be editable by users
+# Include rebrowser-playwright driver (node binary and package)
 datas = []
+try:
+    import rebrowser_playwright
+    import os
+    from pathlib import Path
+
+    # Bundle the driver
+    playwright_driver = os.path.join(os.path.dirname(rebrowser_playwright.__file__), 'driver')
+    if os.path.exists(playwright_driver):
+        datas.append((playwright_driver, 'rebrowser_playwright/driver'))
+        print(f"✓ Bundled rebrowser-playwright driver")
+
+    # Bundle Chromium browser from cache
+    browser_cache = Path.home() / 'Library' / 'Caches' / 'ms-playwright'
+    chromium_headless = browser_cache / 'chromium_headless_shell-1169'
+
+    if chromium_headless.exists():
+        # Bundle chromium_headless_shell for headless mode
+        datas.append((str(chromium_headless), 'ms-playwright/chromium_headless_shell-1169'))
+        print(f"✓ Bundled Chromium headless shell browser")
+    else:
+        print(f"⚠ Warning: Chromium headless browser not found at {chromium_headless}")
+
+except ImportError:
+    print("⚠ Warning: rebrowser_playwright not found, driver won't be bundled")
+except Exception as e:
+    print(f"⚠ Warning: Could not bundle rebrowser_playwright components: {e}")
 
 # Bundle mshell and saml2aws binaries for AWS authentication
 binaries_to_bundle = [
@@ -51,7 +78,7 @@ a = Analysis(
     hiddenimports=hidden_imports,
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['pyi_rth_playwright.py'],  # Set PLAYWRIGHT_BROWSERS_PATH
     excludes=[
         'matplotlib',                   # Exclude unnecessary packages
         'PIL',

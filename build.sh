@@ -85,7 +85,7 @@ if [ -f "dist/quality_evaluation" ]; then
     cd dist
     DATE_STAMP=$(date +%Y%m%d)
     RELEASE_DIR="quality_evaluation_release_$DATE_STAMP"
-    rm -rf "$RELEASE_DIR" quality_evaluation_release_*.tar.gz
+    rm -rf "$RELEASE_DIR" quality_evaluation_release_*.tar.gz quality_evaluation_release_*.tar.xz
     mkdir -p "$RELEASE_DIR"
     cp quality_evaluation ../src/config.yaml "$RELEASE_DIR/"
     tar -czf "$RELEASE_DIR.tar.gz" "$RELEASE_DIR/"
